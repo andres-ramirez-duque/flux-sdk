@@ -10,12 +10,12 @@
 
 #include <Arduino.h>
 
+#include "flxCoreJobs.h"
 #include "flxFlux.h"
+#include "flxPlatform.h"
 #include "flxSerial.h"
 #include "flxSettings.h"
 #include "flxStorage.h"
-
-#include "flxCoreJobs.h"
 
 // for logging - define output driver on the stack
 
@@ -361,15 +361,16 @@ const char *flxFlux::deviceId(void)
     // ID is 16 in length, use a  C string
     static char szDeviceID[17] = {0};
     static bool bInitialized = false;
-#ifdef ESP32
 
     if (!bInitialized)
     {
+        const char *devID = flxPlatform::unique_id();
+
         memset(szDeviceID, '\0', sizeof(szDeviceID));
-        snprintf(szDeviceID, sizeof(szDeviceID), "%4s%012llX", _v_idprefix, ESP.getEfuseMac());
+        snprintf(szDeviceID, sizeof(szDeviceID), "%4s%12s", _v_idprefix, devID);
         bInitialized = true;
     }
-#endif
+
     return (const char *)szDeviceID;
 }
 
