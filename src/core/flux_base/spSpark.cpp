@@ -17,8 +17,6 @@
 
 #include "flxCoreJobs.h"
 
-#include "mbedtls/base64.h"
-
 // for logging - define output driver on the stack
 
 static flxLoggingDrvDefault _logDriver;
@@ -389,14 +387,22 @@ void flxFlux::setAppToken(const uint8_t *data, size_t len)
     if (!data || len == 0)
         return;
 
-    unsigned char szBuffer[len + 1];
-    memcpy(szBuffer, data, len);
+    char szBuffer[len];
+    memset(_token, 0, sizeof(_token));
 
     // convert the token to something we can use.
     size_t outlen;
-    mbedtls_base64_decode(_token, sizeof(_token), &outlen, szBuffer, len);
+    if (!flx_utils::base64_decode((const char *)data, len, szBuffer))
+    {
+        flxLog_E(F("Invalid application token data"));
+        return;
+    }
+
+    memcpy(_token, szBuffer, sizeof(_token) <= len ? sizeof(_token) : len);
+
     _hasToken = true;
 }
+
 //---------------------------------------------------------------------------------
 bool flxFlux::getAppToken(uint8_t outtok[32])
 {
