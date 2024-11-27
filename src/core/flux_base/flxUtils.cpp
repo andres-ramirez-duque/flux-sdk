@@ -1,9 +1,11 @@
 /*
  *---------------------------------------------------------------------------------
  *
- * Copyright (c) 2022-2024, SparkFun Electronics Inc.
- *
- * SPDX-License-Identifier: MIT
+ * Copyright (c) 2022-2024, SparkFun Electronics Inc.  All rights reserved.
+ * This software includes information which is proprietary to and a
+ * trade secret of SparkFun Electronics Inc.  It is not to be disclosed
+ * to anyone outside of this organization. Reproduction by any means
+ * whatsoever is  prohibited without express written permission.
  *
  *---------------------------------------------------------------------------------
  */
@@ -18,8 +20,16 @@
 
 #include "flxCoreLog.h"
 
-#include "mbedtls/aes.h"
+// Fall 2024  - Arduino Pico port
+//
+// The port doesn't include mbedtls, using "bearssl" instead. So check this by using the
+// ARDUINO_PICO_MAJOR define to key off of
 
+#if defined(ARDUINO_PICO_MAJOR)
+#include <bearssl/bearssl_block.h>
+#else
+#include "mbedtls/aes.h"
+#endif
 //-------------------------------------------------------------------------
 // dtostr()
 //
@@ -296,6 +306,19 @@ bool flx_utils::encode_data_aes(uint8_t key[32], unsigned char iv[16], char *sou
         return false;
     }
 
+#if defined(ARDUINO_PICO_MAJOR)
+    // Use bearssl for the Pico
+
+    // encryption context
+    br_aes_big_cbcenc_keys encCtx;
+
+    // reset the encryption context and encrypt the data
+    br_aes_big_cbcenc_init(&encCtx, key, 32);
+
+    // bear uses the  same buffer for input and output
+    memcpy(output, source, len);
+    br_aes_big_cbcenc_run(&encCtx, iv, output, len);
+#else
     mbedtls_aes_context ctxAES;
     int rc = mbedtls_aes_setkey_enc(&ctxAES, key, 256);
     if (rc != 0)
@@ -312,7 +335,7 @@ bool flx_utils::encode_data_aes(uint8_t key[32], unsigned char iv[16], char *sou
     }
 
     mbedtls_aes_free(&ctxAES);
-
+#endif
     return true;
 }
 bool flx_utils::decode_data_aes(uint8_t *key, unsigned char iv[16], char *source, char *output, size_t len)
@@ -327,6 +350,15 @@ bool flx_utils::decode_data_aes(uint8_t *key, unsigned char iv[16], char *source
         return false;
     }
 
+#if defined(ARDUINO_PICO_MAJOR)
+    // Use bearssl for the Pico
+    br_aes_big_cbcdec_keys decCtx;
+
+    br_aes_big_cbcdec_init(&decCtx, key, 32);
+    // bear uses the  same buffer for input and output
+    memcpy(output, source, len);
+    br_aes_big_cbcdec_run(&decCtx, iv, output, len);
+#else
     mbedtls_aes_context ctxAES;
     int rc = mbedtls_aes_setkey_dec(&ctxAES, key, 256);
     if (rc != 0)
@@ -343,7 +375,7 @@ bool flx_utils::decode_data_aes(uint8_t *key, unsigned char iv[16], char *source
     }
 
     mbedtls_aes_free(&ctxAES);
-
+#endif
     return true;
 }
 //---------------------------------------------------------------------------------------------------
