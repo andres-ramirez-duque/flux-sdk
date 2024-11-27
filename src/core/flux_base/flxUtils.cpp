@@ -1,11 +1,9 @@
 /*
  *---------------------------------------------------------------------------------
  *
- * Copyright (c) 2022-2024, SparkFun Electronics Inc.  All rights reserved.
- * This software includes information which is proprietary to and a
- * trade secret of SparkFun Electronics Inc.  It is not to be disclosed
- * to anyone outside of this organization. Reproduction by any means
- * whatsoever is  prohibited without express written permission.
+ * Copyright (c) 2022-2024, SparkFun Electronics Inc.
+ *
+ * SPDX-License-Identifier: MIT
  *
  *---------------------------------------------------------------------------------
  */
@@ -27,8 +25,10 @@
 
 #if defined(ARDUINO_PICO_MAJOR)
 #include <bearssl/bearssl_block.h>
+#include <libb64/cdecode.h>
 #else
 #include "mbedtls/aes.h"
+#include "mbedtls/base64.h"
 #endif
 //-------------------------------------------------------------------------
 // dtostr()
@@ -538,4 +538,31 @@ uint32_t flx_utils::calc_crc32(uint32_t crc, const uint8_t *buf, uint32_t size)
     while (size--)
         crc = crc32_tab[(crc ^ *buf++) & 0xFF] ^ (crc >> 8);
     return ~crc;
+}
+//---------------------------------------------------------------------------------------
+/// base64_decode()
+///
+/// @brief     Decode a base64 string
+/// @param[in] data_in The value in base64 to decode
+/// @param[in] len length of the input buffer and output buffer
+/// @param[in, out] output The decoded value
+///
+/// @return false on error, true on success
+///
+bool flx_utils::base64_decode(const char *data_in, size_t len, char *output)
+{
+    // decode the base64 value passed in
+    if (!data_in || !output || len == 0)
+        return false;
+
+    bool rc = false;
+#if defined(ARDUINO_PICO_MAJOR)
+    rc = base64_decode_chars(data_in, len, output) != 0;
+#else
+
+    // convert the input value
+    size_t outlen;
+    rc = mbedtls_base64_decode(output, len, &outlen, (unsigned char *)data_in, len) == 0;
+#endif
+    return rc;
 }

@@ -63,4 +63,6 @@ bool createVariableName(const char *szInVariable, char *szOutVariable);
 // CRC32 Calculation
 uint32_t calc_crc32(uint32_t crc, const uint8_t *buf, uint32_t size);
 
+bool base64_decode(const char *data_in, size_t len, char *output);
+
 } // namespace flx_utils
