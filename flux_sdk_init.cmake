@@ -19,12 +19,20 @@ macro (flux_sdk_set_platform platform)
     message("Platform:\t${FLUX_SDK_PLATFORM}")
 endmacro ()
 
+# our default library name set(FLUX_SDK_LIBRARY_NAME SparkFun_Flux)
+# ##################################################################################################
+# Allow the user to set the library name
+macro (flux_sdk_set_library_name library_name)
+    set(FLUX_SDK_LIBRARY_NAME ${library_name})
+    message("Library Name:\t${FLUX_SDK_LIBRARY_NAME}")
+endmacro ()
 # ##################################################################################################
 # flux_sdk_set_project_directory()
 #
 macro (flux_sdk_set_project_directory project_directory)
 
-    set(PROJECT_FLUX_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${project_directory}/SparkFun_Flux)
+    set(PROJECT_FLUX_DIRECTORY
+        ${CMAKE_CURRENT_SOURCE_DIR}/${project_directory}/${FLUX_SDK_LIBRARY_NAME})
 
     if (NOT EXISTS ${PROJECT_FLUX_DIRECTORY})
         message(STATUS "Creating directory: ${PROJECT_FLUX_DIRECTORY}")
