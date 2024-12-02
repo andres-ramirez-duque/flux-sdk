@@ -442,7 +442,11 @@ size_t flxStorageKVPBlock::readBytes(const char *tag, uint8_t *data, size_t len)
 
     size_t nBytes = _prefs->getBytesLength(szHash);
 
-    return _prefs->getBytes(szHash, data, (nBytes < len ? nBytes : len));
+    // room in buffer?
+    if (nBytes > len)
+        return 0;
+
+    return _prefs->getBytes(szHash, data, len);
 }
 //------------------------------------------------------------------------------
 size_t flxStorageKVPBlock::getBytesLength(const char *tag)
