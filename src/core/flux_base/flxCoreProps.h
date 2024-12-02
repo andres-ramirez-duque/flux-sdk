@@ -258,7 +258,7 @@ class _flxPropertyBase : public flxProperty, public _flxDataIn<T>, public _flxDa
 
     bool hidden()
     {
-        return (_flags & kIsHidden == kIsHidden);
+        return ((_flags & kIsHidden) == kIsHidden);
     }
     // Add a method that allows the property to be hidden if public
     void setHidden(void)
@@ -267,7 +267,7 @@ class _flxPropertyBase : public flxProperty, public _flxDataIn<T>, public _flxDa
     }
     bool secure()
     {
-        return (_flags & kIsSecure == kIsSecure);
+        return ((_flags & kIsSecure) == kIsSecure);
     }
     //---------------------------------------------------------------------------------
     flxDataType_t type()
@@ -416,7 +416,7 @@ class _flxPropertyBaseString : public flxProperty, _flxDataInString, _flxDataOut
 
     bool hidden()
     {
-        return (_flags & kIsHidden == kIsHidden);
+        return ((_flags & kIsHidden) == kIsHidden);
     }
     // Add a method that allows the property to be hidden if public
     void setHidden(void)
@@ -425,7 +425,7 @@ class _flxPropertyBaseString : public flxProperty, _flxDataInString, _flxDataOut
     }
     bool secure()
     {
-        return (_flags & kIsSecure == kIsSecure);
+        return ((_flags & kIsSecure) == kIsSecure);
     }
 
     flxDataType_t type()
