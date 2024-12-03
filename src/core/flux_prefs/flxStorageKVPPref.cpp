@@ -21,19 +21,18 @@
 #include "flxCoreLog.h"
 #include "flxUtils.h"
 
-#define kESP32HashTagSize 16
+#define kHashTagSize 16
 
-#define kESP32MinTagLen 3
+#define kMinTagLen 3
 
 // Note: the Preferences library wants tags >= 15 chars. Do do this, we has our
 // object names and print the names has (a number) to a string.
 // handy helper
 static bool tag_is_valid(const char *tag)
 {
-    if (!tag || strlen(tag) < kESP32MinTagLen)
+    if (!tag || strlen(tag) < kMinTagLen)
     {
-        flxLog_E("Preference  Storage - invalid tag length - minimum is %d: %s\n\r", kESP32MinTagLen,
-                 !tag ? "NULL" : tag);
+        flxLog_E("Preference  Storage - invalid tag length - minimum is %d: %s\n\r", kMinTagLen, !tag ? "NULL" : tag);
         return false;
     }
     return true;
@@ -48,7 +47,7 @@ bool flxStorageKVPBlock::writeBool(const char *tag, bool value)
     if (!tag_is_valid(tag) || !_prefs || _readOnly)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -63,7 +62,7 @@ bool flxStorageKVPBlock::writeInt8(const char *tag, int8_t value)
     if (!tag_is_valid(tag) || !_prefs || _readOnly)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -79,7 +78,7 @@ bool flxStorageKVPBlock::writeInt16(const char *tag, int16_t value)
     if (!tag_is_valid(tag) || !_prefs || _readOnly)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -95,7 +94,7 @@ bool flxStorageKVPBlock::writeInt32(const char *tag, int32_t value)
     if (!tag_is_valid(tag) || !_prefs || _readOnly)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -110,7 +109,7 @@ bool flxStorageKVPBlock::writeUInt8(const char *tag, uint8_t value)
     if (!tag_is_valid(tag) || !_prefs || _readOnly)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -126,7 +125,7 @@ bool flxStorageKVPBlock::writeUInt16(const char *tag, uint16_t value)
     if (!tag_is_valid(tag) || !_prefs || _readOnly)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -140,7 +139,7 @@ bool flxStorageKVPBlock::writeUInt32(const char *tag, uint32_t value)
     if (!tag_is_valid(tag) || !_prefs || _readOnly)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -155,7 +154,7 @@ bool flxStorageKVPBlock::writeFloat(const char *tag, float value)
     if (!tag_is_valid(tag) || !_prefs || _readOnly)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -170,7 +169,7 @@ bool flxStorageKVPBlock::writeDouble(const char *tag, double value)
     if (!tag_is_valid(tag) || !_prefs || _readOnly)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -190,7 +189,7 @@ bool flxStorageKVPBlock::writeString(const char *tag, const char *value)
     if (!value || strlen(value) == 0)
         return true;
 
-    char szHash[kESP32HashTagSize] = {0};
+    char szHash[kHashTagSize] = {0};
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -212,7 +211,7 @@ bool flxStorageKVPBlock::writeBytes(const char *tag, const uint8_t *value, size_
     if (!value || len == 0)
         return true;
 
-    char szHash[kESP32HashTagSize] = {0};
+    char szHash[kHashTagSize] = {0};
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -228,7 +227,7 @@ bool flxStorageKVPBlock::readBool(const char *tag, bool &value)
     if (!tag_is_valid(tag) || !_prefs)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -246,7 +245,7 @@ bool flxStorageKVPBlock::readInt8(const char *tag, int8_t &value)
     if (!tag_is_valid(tag) || !_prefs)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -265,7 +264,7 @@ bool flxStorageKVPBlock::readInt16(const char *tag, int16_t &value)
     if (!tag_is_valid(tag) || !_prefs)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -284,7 +283,7 @@ bool flxStorageKVPBlock::readInt32(const char *tag, int32_t &value)
     if (!tag_is_valid(tag) || !_prefs)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -303,7 +302,7 @@ bool flxStorageKVPBlock::readUInt8(const char *tag, uint8_t &value)
     if (!tag_is_valid(tag) || !_prefs)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -322,7 +321,7 @@ bool flxStorageKVPBlock::readUInt16(const char *tag, uint16_t &value)
     if (!tag_is_valid(tag) || !_prefs)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -341,7 +340,7 @@ bool flxStorageKVPBlock::readUInt32(const char *tag, uint32_t &value)
     if (!tag_is_valid(tag) || !_prefs)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -360,7 +359,7 @@ bool flxStorageKVPBlock::readFloat(const char *tag, float &value)
     if (!tag_is_valid(tag) || !_prefs)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -379,7 +378,7 @@ bool flxStorageKVPBlock::readDouble(const char *tag, double &value)
     if (!tag_is_valid(tag) || !_prefs)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -398,7 +397,7 @@ size_t flxStorageKVPBlock::readString(const char *tag, char *data, size_t len)
     if (!tag_is_valid(tag) || !_prefs)
         return 0;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return 0;
@@ -414,7 +413,7 @@ size_t flxStorageKVPBlock::getStringLength(const char *tag)
     if (!tag_is_valid(tag) || !_prefs)
         return 0;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return 0;
@@ -432,7 +431,7 @@ size_t flxStorageKVPBlock::readBytes(const char *tag, uint8_t *data, size_t len)
     if (!tag_is_valid(tag) || !_prefs)
         return 0;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return 0;
@@ -454,7 +453,7 @@ size_t flxStorageKVPBlock::getBytesLength(const char *tag)
     if (!tag_is_valid(tag) || !_prefs)
         return 0;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return 0;
@@ -470,7 +469,7 @@ bool flxStorageKVPBlock::valueExists(const char *tag)
     if (!tag_is_valid(tag) || !_prefs)
         return false;
 
-    char szHash[kESP32HashTagSize];
+    char szHash[kHashTagSize];
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return false;
@@ -503,7 +502,7 @@ flxStorageKVPBlock *flxStorageKVPPref::beginBlock(const char *tag)
     if (!tag_is_valid(tag))
         return nullptr;
 
-    char szHash[kESP32HashTagSize] = {0};
+    char szHash[kHashTagSize] = {0};
 
     if (!flx_utils::id_hash_string_to_string(tag, szHash, sizeof(szHash)))
         return nullptr;
