@@ -223,3 +223,30 @@ int flxLoggingDrvESP32::logPrintf(const flxLogLevel_t level, bool newline, const
     return 1;
 }
 #endif
+
+// Helper function impl
+
+void flxSetLoggingVerbose(void)
+{
+    flxLog.setLogLevel(flxLogVerbose);
+}
+bool flxIsLoggingVerbose(void)
+{
+    return (flxLog.logLevel() == flxLogVerbose);
+}
+void flxSetLoggingInfo(void)
+{
+    flxLog.setLogLevel(flxLogInfo);
+}
+bool flxIsLoggingInfo(void)
+{
+    return (flxLog.logLevel() >= flxLogInfo);
+}
+void flxSetLoggingDebug(void)
+{
+    flxLog.setLogLevel(flxLogDebug);
+}
+bool flxIsLoggingDebug(void)
+{
+    return (flxLog.logLevel() >= flxLogDebug);
+}
