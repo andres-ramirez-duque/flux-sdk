@@ -566,3 +566,18 @@ bool flx_utils::base64_decode(const char *data_in, size_t len, char *output)
 #endif
     return rc;
 }
+
+
+bool flx_utils::is_little_endian()
+{
+    uint32_t i = 1;
+    return *((uint8_t *)&i) == 1;
+}
+uint16_t flx_utils::swap_uint16(uint16_t val)
+{
+    return __bswap16(val);
+}
+uint32_t flx_utils::swap_uint32(uint32_t val)
+{
+    return __bswap32(val);
+}
