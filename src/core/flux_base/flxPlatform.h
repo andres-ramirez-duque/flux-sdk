@@ -16,4 +16,7 @@ class flxPlatform
   public:
     // Return a unique identifier for the device - a 12 char hex string
     static const char *unique_id(void);
+
+    // Restart the device
+    static void restart_device(void);
 };

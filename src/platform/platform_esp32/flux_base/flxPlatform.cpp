@@ -12,6 +12,10 @@
 
 // esp version of our platform class
 
+//---------------------------------------------------------------------------------
+/// @brief Return a unique identifier for the device - a 12 char hex string
+/// @return const char* - the unique identifier
+///
 const char *flxPlatform::unique_id(void)
 {
     static char szDeviceID[13] = {0};
@@ -21,4 +25,12 @@ const char *flxPlatform::unique_id(void)
         snprintf(szDeviceID, sizeof(szDeviceID), "%012llX", ESP.getEfuseMac());
     }
     return szDeviceID;
+}
+
+//---------------------------------------------------------------------------------
+/// @brief Restart the device
+///
+static void flxPlatform::restart_device(void)
+{
+    esp_restart();
 }
