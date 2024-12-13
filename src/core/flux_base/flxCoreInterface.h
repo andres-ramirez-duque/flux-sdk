@@ -76,4 +76,18 @@ class flxWriter
     {
         write(value.c_str(), true);
     };
+
+    // Color testing
+    virtual bool colorEnabled(void)
+    {
+        return false;
+    }
+    virtual void textToRed(void) {};
+    virtual void textToGreen(void) {};
+    virtual void textToYellow(void) {};
+    virtual void textToBlue(void) {};
+    virtual void textToWhite(void) {};
+    virtual void textToNormal(void) {};
+    virtual void textToCyan(void) {};
+    virtual void textToMagenta(void) {};
 };
