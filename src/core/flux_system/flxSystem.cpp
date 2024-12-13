@@ -46,10 +46,10 @@ void flxSystem::restartDevicePrompt()
 void flxSystem::restartDevice()
 {
     // Now
-    flxLog_N(F("Restarting the device..."));
+    flxLog_I(F("Restarting the device..."));
 
     flxSendEvent(flxEvent::kOnSystemRestart);
-    delay(500);
+    delay(200);
 
     flxPlatform::restart_device();
 }
@@ -86,7 +86,8 @@ void flxSystem::resetDevicePrompt()
 //-----------------------------------------------------------------------------------
 void flxSystem::resetDevice()
 {
-    // TODO - clear out the on-board settings...
-
+    flxLog_I(F("Resetting the device..."));
+    flxSendEvent(flxEvent::kOnSystemReset);
+    delay(200);
     restartDevice();
 }

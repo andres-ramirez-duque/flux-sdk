@@ -19,6 +19,7 @@
 
 // Define the firmware load event
 flxDefineEventID(kOnSystemRestart);
+flxDefineEventID(kOnSystemReset);
 
 class flxSystem : public flxActionType<flxSystem>
 {
