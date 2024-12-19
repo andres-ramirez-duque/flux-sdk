@@ -9,6 +9,8 @@
  */
 
 #pragma once
+
+#include <cstdint>
 // Defines a interface of static class methods that the *platform* must provide the implementation for
 
 class flxPlatform
@@ -19,4 +21,11 @@ class flxPlatform
 
     // Restart the device
     static void restart_device(void);
+
+    // Memory things
+    // Heap Size
+    static uint32_t heap_size(void);
+
+    // free heap
+    static uint32_t heap_free(void);
 };

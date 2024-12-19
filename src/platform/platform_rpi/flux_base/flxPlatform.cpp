@@ -11,6 +11,7 @@
 #include "flxPlatform.h"
 
 #include <hardware/watchdog.h>
+#include <malloc.h>
 #include <pico/unique_id.h>
 
 // rpi version of our platform class
@@ -35,4 +36,20 @@ const char *flxPlatform::unique_id(void)
 void flxPlatform::restart_device(void)
 {
     watchdog_reboot(0, 0, 0);
+}
+
+// memory things
+uint32_t flxPlatform::heap_size(void)
+{
+    extern char __StackLimit, __bss_end__;
+
+    return &__StackLimit - &__bss_end__;
+}
+
+// free heap
+uint32_t flxPlatform::heap_free(void)
+{
+    struct mallinfo m = mallinfo();
+
+    return heap_size() - m.uordblks;
 }

@@ -34,3 +34,15 @@ static void flxPlatform::restart_device(void)
 {
     esp_restart();
 }
+
+// memory things
+uint32_t flxPlatform::heap_size(void)
+{
+    return ESP.getHeapSize();
+}
+
+// free heap
+uint32_t flxPlatform::heap_free(void)
+{
+    return ESP.getFreeHeap();
+}
