@@ -153,3 +153,12 @@ const flxParamValueType_t kParamValueWhiteLight = 45;
 
 // Distance - Distance in meters - uint32_t value
 const flxParamValueType_t kParamValueDistance = 46;
+
+// Battery Charge - Battery charge % - float value
+const flxParamValueType_t kParamValueBatteryCharge = 47;
+
+// Battery Voltage - Battery voltage in volts - float value
+const flxParamValueType_t kParamValueBatteryVoltage = 48;
+
+// Battery Charge Rate %/hr - Battery charge rate %/hr - float value
+const flxParamValueType_t kParamValueBatteryChargeRate = 49;
