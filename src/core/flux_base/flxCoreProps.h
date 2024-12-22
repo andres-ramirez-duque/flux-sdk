@@ -1919,7 +1919,7 @@ class flxObject : public flxPersist, public _flxPropertyContainer, public flxDes
         bool status = onRestore(stBlk);
 
         if (!status)
-            flxLogM_D(kMsgErrSaveResState, "restoring", name());
+            flxLog_D("%s: some values not restored", name());
 
         pStorage->endBlock(stBlk);
 
