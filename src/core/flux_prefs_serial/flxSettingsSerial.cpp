@@ -595,13 +595,19 @@ void flxSettingsSerial::drawMenuEntry(uint item, flxParameter *pParam)
     if (pParam->title())
         Serial.printf("\n\r    %s\n\r", pParam->title());
 
-    Serial.printf("\t%2d)  %-20s - %-40s  ", item, pParam->name(), pParam->description());
+    Serial.printf("\t%2d)  %-20s - %-45s  ", item, pParam->name(), pParam->description());
     if (!pParam->enabled())
     {
         flxSerial.textToYellow();
-        Serial.printf("{disabled}");
+        Serial.printf("{disabled}  ");
         flxSerial.textToNormal();
     }
+    // if in verbose mode, and we have a value type, print it out
+    if (flxIsLoggingVerbose() && pParam->valueType() != kParamValueNone)
+    {
+        Serial.printf("{Value Type: 0x%0.2X}", (pParam->valueType()));
+    }
+
     Serial.printf("\n\r");
 }
 //-----------------------------------------------------------------------------
