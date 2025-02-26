@@ -168,3 +168,9 @@ const flxParamValueType_t kParamValueTempC_D = 50;
 
 // Pressure - double value
 const flxParamValueType_t kParamValuePressure_D = 51;
+
+// Soil Moisture Reading Raw   - uint16
+const flxParamValueType_t kParamValueSoilMoistureRaw = 52;
+
+// Soil Moisture - percent
+const flxParamValueType_t kParamValueSoilMoisturePercent_F = 53;
