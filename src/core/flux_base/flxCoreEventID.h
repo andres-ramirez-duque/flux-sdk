@@ -75,3 +75,6 @@ flxDefineEventID(kOnSystemActivity);
 
 // Low notice system activity;
 flxDefineEventID(kOnSystemActivityLow);
+
+// System needs a restart/reboot
+flxDefineEventID(kSystemNeedsRestart);

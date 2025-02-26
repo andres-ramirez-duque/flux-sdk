@@ -271,7 +271,7 @@ class flxMQTTESP32 : public flxMQTTESP32Base<flxMQTTESP32, WiFiClient>, public f
         flux.add(this);
     }
     // for the Writer interface
-    void write(int data)
+    void write(int32_t data)
     {
         // noop
     }

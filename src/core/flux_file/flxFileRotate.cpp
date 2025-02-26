@@ -111,7 +111,7 @@ bool flxFileRotate::openNextLogFile()
 }
 
 //------------------------------------------------------------------------------------------------
-void flxFileRotate::write(int value)
+void flxFileRotate::write(int32_t value)
 {
     write(flx_utils::to_string(value).c_str(), true, flxLineTypeData);
 }

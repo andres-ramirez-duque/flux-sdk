@@ -229,5 +229,7 @@ class flxIFileSystem : public flxDescriptor
 
     virtual bool enabled(void) = 0;
 
+#ifdef ESP32
     virtual FS fileSystem(void) = 0;
+#endif
 };

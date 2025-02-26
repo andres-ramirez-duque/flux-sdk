@@ -64,7 +64,13 @@ class flxTimer : public flxActionType<flxTimer>
 
         return true;
     }
-
+    // public method to trigger the timer
+    void trigger(void)
+    {
+        onTimer();
+        // reset the timer period ... restarts the count down.
+        flxUpdateJobInQueue(_timerJob);
+    }
     // Our output event
     flxSignalVoid on_interval;
 

@@ -40,7 +40,7 @@ class flxSerial_ : public flxWriter
         Serial.println(value);
     }
 
-    void write(int value)
+    void write(int32_t value)
     {
         Serial.println(value);
     }
