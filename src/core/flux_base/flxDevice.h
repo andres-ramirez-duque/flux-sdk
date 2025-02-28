@@ -285,3 +285,56 @@ template <typename T, typename B = flxDevice> class flxDeviceSPIType : public B
         return kind();
     }
 };
+
+//----------------------------------------------------------------------------------
+// GPIO device classes
+//----------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------
+// flxDeviceGPIOType()
+//
+// A simple base class that a GPIO based device can be build off of.
+// This basically exists to help with type definition.  The actual device impl needs to
+// needs to provide the required initialize() method for it's specific needs
+//
+//
+template <typename T> class flxDeviceGPIOType : public flxDevice
+{
+  public:
+    // Typing system for devices
+    //
+    // Defines a type specific static method - so can be called outside
+    // of an instance.
+    //
+    // The typeID is determined by hashing the name of the class.
+    // This way the type ID is consistent across invocations
+
+    static flxTypeID type(void)
+    {
+        static flxTypeID _myTypeID = flxGetClassTypeID<T>();
+
+        return _myTypeID;
+    }
+
+    // Return the type ID of this
+    flxTypeID getType(void)
+    {
+        return type();
+    }
+
+    bool isType(flxTypeID type)
+    {
+        return type == getType();
+    }
+
+    // Device Kind Typing
+    static flxDeviceKind_t kind(void)
+    {
+        return flxDeviceKindGPIO;
+    }
+
+    flxDeviceKind_t getKind(void)
+    {
+        return kind();
+    }
+};
