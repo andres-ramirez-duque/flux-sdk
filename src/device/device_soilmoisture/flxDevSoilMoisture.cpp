@@ -61,7 +61,7 @@ bool flxDevSoilMoisture::isConnected(flxBusI2C &i2cDriver, uint8_t address)
 //
 // Called during the startup/initialization of the driver (after the constructor is called).
 //
-// Place to initialized the underlying device library/driver
+// Place to initialize the underlying device library/driver
 //
 bool flxDevSoilMoisture::onInitialize(TwoWire &wirePort)
 {
