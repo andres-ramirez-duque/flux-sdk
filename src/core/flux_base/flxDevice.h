@@ -309,6 +309,21 @@ template <typename T> class flxDeviceGPIOType : public flxDevice
     // The typeID is determined by hashing the name of the class.
     // This way the type ID is consistent across invocations
 
+    // virtual catch method if subclass forgets to implement it
+    virtual bool onInitialize(void)
+    {
+        return true;
+    }
+
+    // a wrapper that the system can use for GPIO device
+    bool initialize(void)
+    {
+
+        bool status = onInitialize();
+        setIsInitialized(status);
+        return status;
+    }
+
     static flxTypeID type(void)
     {
         static flxTypeID _myTypeID = flxGetClassTypeID<T>();

@@ -21,15 +21,9 @@
 
 #include "flxDevSoilMoisture.h"
 
-// Define our class static variables - allocs storage for them
+const uint8_t kCalibrationIterations = 5;
 
-uint8_t flxDevSoilMoisture::defaultDeviceAddress[] = {SF_SOIL_MOISTURE_DEFAULT_I2C_ADDRESS, kSparkDeviceAddressNull};
-
-//----------------------------------------------------------------------------------------------------------
-// Register this class with the system, enabling this driver during system
-// initialization and device discovery.
-
-flxRegisterDevice(flxDevSoilMoisture);
+const uint16_t kCachedValueDeltaTicks = 1000;
 
 //----------------------------------------------------------------------------------------------------------
 // Constructor
@@ -38,24 +32,27 @@ flxRegisterDevice(flxDevSoilMoisture);
 // and managed properties.
 
 flxDevSoilMoisture::flxDevSoilMoisture()
+    : _pinVCC{kNoPinSet}, _pinSensor{kNoPinSet}, _isEnabled{false}, _lowCalVal{0}, _highCalVal{900}, _lastValueTick{0}
 {
 
     // Setup unique identifiers for this device and basic device object systems
     setName(getDeviceName());
     setDescription("The SparkFun Soil Moisture Sensor");
 
+    // Register properties
+    flxRegister(isEnabled, "Enable this sensor", "When true, this sensor is enabled");
+    flxRegister(vccPin, "VCC Pin", "The power (VCC) GPIO pin connected to the soil sensor. 0 = disabled");
+    flxRegister(sensorPin, "Sensor Pin", "The sensor GPIO pin connected to the soil sensor. 0 = disabled");
+
+    // Functions
+    flxRegister(calibrateLowValue, "Calibrate Low (dry) Value", "Set the 0% moist (dry) value of the sensor");
+    flxRegister(calibrateHighValue, "Calibrate High (wet) Value", "Set the 100% moist value of the sensor");
+
     // Register parameters
-    flxRegister(moistureValue, "Moisture Sensor Value", "A value of 0 (wet) to 1023 (dry)", kParamValueSoilMoistureRaw);
+    flxRegister(moistureValue, "Moisture Sensor Value", "A value of 0 (dry) to 1023 (wet)", kParamValueSoilMoistureRaw);
     flxRegister(moisturePercent, "Percent Moisture", "Value between 0.0% and 100.0%", kParamValueSoilMoisturePercent_F);
 }
 
-//----------------------------------------------------------------------------------------------------------
-// Static method used to determine if devices is connected before creating this object (if creating dynamically)
-bool flxDevSoilMoisture::isConnected(flxBusI2C &i2cDriver, uint8_t address)
-{
-    // For speed, ping the device address first
-    return i2cDriver.ping(address);
-}
 //----------------------------------------------------------------------------------------------------------
 // onInitialize()
 //
@@ -63,26 +60,162 @@ bool flxDevSoilMoisture::isConnected(flxBusI2C &i2cDriver, uint8_t address)
 //
 // Place to initialize the underlying device library/driver
 //
-bool flxDevSoilMoisture::onInitialize(TwoWire &wirePort)
+//-----------------------------------------------------------------------
+bool flxDevSoilMoisture::onInitialize(void)
+{
+    if (isInitialized())
+        return true;
+
+    return setupSensor();
+}
+//-----------------------------------------------------------------------
+bool flxDevSoilMoisture::setupSensor(void)
 {
 
-    if (SparkFunSoilMoistureSensor::begin(flxDevice::address(), wirePort) == false)
-    {
-        flxLog_E("%s: failed to initialize", getDeviceName());
+    // Pins define yet?
+    if (_pinVCC == kNoPinSet || _pinSensor == kNoPinSet || !_isEnabled)
         return false;
-    }
+
+    // setup our power pin - enable output, set to low
+    pinMode(_pinVCC, OUTPUT);
+    digitalWrite(_pinVCC, LOW);
+
+    // this is cal
+    setIsInitialized(true);
 
     return true;
 }
+//-----------------------------------------------------------------------
+//  Properties
+//-----------------------------------------------------------------------
 
-// GETTER methods for output params
-uint16_t flxDevSoilMoisture::read_moisture_value()
+bool flxDevSoilMoisture::get_is_enabled(void)
 {
+    return _isEnabled;
+}
+void flxDevSoilMoisture::set_is_enabled(bool enable)
+{
+    if (enable == _isEnabled)
+        return;
 
-    return SparkFunSoilMoistureSensor::readMoistureValue();
+    _isEnabled = enable;
+    // are we turning this on?
+    if (enable)
+        setupSensor();
 }
 
+uint8_t flxDevSoilMoisture::get_vcc_pin(void)
+{
+    return _pinVCC;
+}
+void flxDevSoilMoisture::set_vcc_pin(uint8_t newPin)
+{
+
+    if (_pinVCC == newPin)
+        return;
+
+    _pinVCC = newPin;
+
+    // If this is a no pin set value, disable sensor
+    if (newPin == kNoPinSet)
+        set_is_enabled(false);
+    else
+        setupSensor(); // new pin, do the setup.
+}
+
+uint8_t flxDevSoilMoisture::get_sensor_pin(void)
+{
+    return _pinSensor;
+}
+void flxDevSoilMoisture::set_sensor_pin(uint8_t newPin)
+{
+
+    if (_pinSensor == newPin)
+        return;
+
+    _pinSensor = newPin;
+    setAddress(_pinSensor);
+
+    // If this is a no pin set value, disable sensor
+    if (newPin == kNoPinSet)
+        set_is_enabled(false);
+}
+
+//-----------------------------------------------------------------------
+// GETTER methods for output params
+//-----------------------------------------------------------------------
+uint16_t flxDevSoilMoisture::read_moisture_value()
+{
+    // This returns the RAW sensor value
+    if (!isInitialized() || !_isEnabled)
+        return 0;
+
+    // do we have a cached value?
+    if ((millis() - _lastValueTick) > kCachedValueDeltaTicks)
+    {
+        // get the value from the sensor
+        // enable power
+        digitalWrite(_pinVCC, HIGH);
+        delay(30);
+        _lastValue = analogRead(_pinSensor);
+        _lastValueTick = millis();
+        // power off
+        digitalWrite(_pinVCC, LOW);
+    }
+    return _lastValue;
+}
+
+//-----------------------------------------------------------------------
 float flxDevSoilMoisture::read_moisture_percent()
 {
-    return SparkFunSoilMoistureSensor::readMoisturePercentage();
+    float sensorValue = (float)read_moisture_value();
+
+    return (100. / (_highCalVal - _lowCalVal)) * (sensorValue - (float)_lowCalVal);
+}
+
+//-----------------------------------------------------------------------
+// calibration
+//-----------------------------------------------------------------------
+void flxDevSoilMoisture::calibrate_low_value(void)
+{
+    // check if sensor is up and setup
+    if (!_isEnabled || !isInitialized())
+    {
+        flxLog_W("%s: Sensor not setup and enabled. Unable to continue", name());
+        return;
+    }
+    uint32_t valueSum = 0;
+
+    flxLog_N_(F("Calibrating sensor dry value.."));
+
+    for (int i = 0; i < kCalibrationIterations; i++)
+    {
+        valueSum += read_moisture_value();
+        delay(kCachedValueDeltaTicks + 1);
+        flxLog_N_(".");
+    }
+
+    _lowCalVal = valueSum / kCalibrationIterations;
+    flxLog_N(F("Calibration complete. Dry value is: %d"), _lowCalVal);
+}
+//-----------------------------------------------------------------------
+void flxDevSoilMoisture::calibrate_high_value(void)
+{
+    // check if sensor is up and setup
+    if (!_isEnabled || !isInitialized())
+    {
+        flxLog_W("%s: Sensor not setup and enabled. Unable to continue", name());
+        return;
+    }
+    uint32_t valueSum = 0;
+
+    flxLog_N_(F("Calibrating sensor 100% wet value.."));
+    for (int i = 0; i < kCalibrationIterations; i++)
+    {
+        valueSum += read_moisture_value();
+        delay(kCachedValueDeltaTicks + 1);
+        flxLog_N_(".");
+    }
+    _highCalVal = valueSum / kCalibrationIterations;
+    flxLog_N(F("Calibration complete. 100\% Web value is: %d"), _highCalVal);
 }
