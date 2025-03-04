@@ -321,6 +321,11 @@ template <typename T> class flxDeviceGPIOType : public flxDevice
 
         bool status = onInitialize();
         setIsInitialized(status);
+
+        // Call the super class version of this method.
+        // It ensures that the device is added to the system
+        flxDevice::initialize();
+
         return status;
     }
 
