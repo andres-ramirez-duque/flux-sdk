@@ -1974,7 +1974,7 @@ template <class T> class flxContainer : public flxObject
         // make sure the value isn't already in the list...
         if (std::find(_vector.begin(), _vector.end(), value) != _vector.end())
         {
-            flxLogM_I(kMsgNotAddDupDev, name());
+            flxLogM_V(kMsgNotAddDupDev, name());
             return;
         }
         _vector.push_back(value);
@@ -2063,6 +2063,15 @@ template <class T> class flxContainer : public flxObject
             return;
 
         _vector.erase(it);
+    }
+
+    // Does this vector contains a value?
+    bool contains(T value)
+    {
+        // in the vector?
+        iterator it = std::find(_vector.begin(), _vector.end(), value);
+
+        return it != _vector.end();
     }
 
     // Defines a type specific static method - so can be called outside
