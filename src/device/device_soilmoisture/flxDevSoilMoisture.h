@@ -65,6 +65,23 @@ class flxDevSoilMoisture : public flxDeviceGPIOType<flxDevSoilMoisture>
     uint8_t get_sensor_pin(void);
     void set_sensor_pin(uint8_t);
 
+    uint16_t get_cal_low(void)
+    {
+        return _lowCalVal;
+    }
+    void set_cal_low(uint16_t val)
+    {
+        _lowCalVal = val;
+    }
+    uint16_t get_cal_high(void)
+    {
+        return _highCalVal;
+    }
+    void set_cal_high(uint16_t val)
+    {
+        _highCalVal = val;
+    }
+
     // methods used to get values for our output parameters
     uint16_t read_moisture_value();
     float read_moisture_percent();
@@ -92,6 +109,12 @@ class flxDevSoilMoisture : public flxDeviceGPIOType<flxDevSoilMoisture>
     flxPropertyRWUInt8<flxDevSoilMoisture, &flxDevSoilMoisture::get_vcc_pin, &flxDevSoilMoisture::set_vcc_pin> vccPin;
     flxPropertyRWUInt8<flxDevSoilMoisture, &flxDevSoilMoisture::get_sensor_pin, &flxDevSoilMoisture::set_sensor_pin>
         sensorPin;
+
+    // cal values
+    flxPropertyRWUInt16<flxDevSoilMoisture, &flxDevSoilMoisture::get_cal_low, &flxDevSoilMoisture::set_cal_low>
+        calibrationDry = {0};
+    flxPropertyRWUInt16<flxDevSoilMoisture, &flxDevSoilMoisture::get_cal_high, &flxDevSoilMoisture::set_cal_high>
+        calibrationWet = {1024};
 
     // functions
     flxParameterInVoid<flxDevSoilMoisture, &flxDevSoilMoisture::calibrate_low_value> calibrateLowValue;

@@ -43,13 +43,15 @@ flxDevSoilMoisture::flxDevSoilMoisture()
     flxRegister(isEnabled, "Enable this sensor", "When true, this sensor is enabled");
     flxRegister(vccPin, "VCC Pin", "The power (VCC) GPIO pin connected to the soil sensor. 0 = disabled");
     flxRegister(sensorPin, "Sensor Pin", "The sensor GPIO pin connected to the soil sensor. 0 = disabled");
+    flxRegister(calibrationDry, "Calibration Dry Value", "The calibrated value for dry (0% moisture)");
+    flxRegister(calibrationWet, "Calibration Wet Value", "The calibrated value for wet (100% moisture)");
 
     // Functions
     flxRegister(calibrateLowValue, "Calibrate Low (dry) Value", "Set the 0% moist (dry) value of the sensor");
     flxRegister(calibrateHighValue, "Calibrate High (wet) Value", "Set the 100% moist value of the sensor");
 
     // Register parameters
-    flxRegister(moistureValue, "Moisture Sensor Value", "A value of 0 (dry) to 1023 (wet)", kParamValueSoilMoistureRaw);
+    flxRegister(moistureValue, "Moisture Sensor Value", "A value of dry (0) to wet", kParamValueSoilMoistureRaw);
     flxRegister(moisturePercent, "Percent Moisture", "Value between 0.0% and 100.0%", kParamValueSoilMoisturePercent_F);
 }
 
@@ -73,7 +75,7 @@ bool flxDevSoilMoisture::setupSensor(void)
 {
 
     // Pins define yet?
-    if (_pinVCC == kNoPinSet || _pinSensor == kNoPinSet || !_isEnabled)
+    if (_pinVCC == kNoPinSet || _pinSensor == kNoPinSet)
         return false;
 
     // setup our power pin - enable output, set to low
@@ -197,6 +199,9 @@ void flxDevSoilMoisture::calibrate_low_value(void)
 
     _lowCalVal = valueSum / kCalibrationIterations;
     flxLog_N(F("Calibration complete. Dry value is: %d"), _lowCalVal);
+
+    // so this value is saved
+    this->setIsDirty();
 }
 //-----------------------------------------------------------------------
 void flxDevSoilMoisture::calibrate_high_value(void)
@@ -217,5 +222,7 @@ void flxDevSoilMoisture::calibrate_high_value(void)
         flxLog_N_(".");
     }
     _highCalVal = valueSum / kCalibrationIterations;
-    flxLog_N(F("Calibration complete. 100\% Web value is: %d"), _highCalVal);
+    flxLog_N(F("Calibration complete. 100%c Web value is: %d"), '%', _highCalVal);
+    // so this value is saved
+    this->setIsDirty();
 }
