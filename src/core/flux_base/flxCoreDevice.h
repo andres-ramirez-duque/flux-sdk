@@ -39,6 +39,7 @@ typedef enum
 {
     flxDeviceKindI2C,
     flxDeviceKindSPI,
+    flxDeviceKindGPIO,
     flxDeviceKindNone
 } flxDeviceKind_t;
 

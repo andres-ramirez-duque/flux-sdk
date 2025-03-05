@@ -207,6 +207,18 @@ void flxFlux::add(flxDevice *theDevice)
     Devices.push_back(theDevice);
 }
 
+//---------------------------------------------------------------------------------
+// Remove a device
+void flxFlux::remove(flxDevice *theDevice)
+{
+    Devices.remove(theDevice);
+}
+
+bool flxFlux::contains(flxDevice *theDevice)
+{
+    return Devices.contains(theDevice);
+}
+
 #define kApplicationHashIDSize 24
 
 //---------------------------------------------------------------------------------
