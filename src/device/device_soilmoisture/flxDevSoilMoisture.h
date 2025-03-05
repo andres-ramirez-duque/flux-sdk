@@ -8,14 +8,22 @@
  *---------------------------------------------------------------------------------
  */
 
-/*
+/**
+ * @file flxDevSoilMoisture.h
+ * @brief Header file for the SparkFun Soil Moisture sensor device object.
  *
- *  flxDevSoilMoisture.h
+ * This file contains the definition of the device object for the SparkFun Soil Moisture sensor.
+ * Note - this is a GPIO device, which depends on the Soil Moisture Sensor being connected to defined GPIO pins.
+ * The required pins are VCC - a digitally controlled pin (to set low and high to power the sensor during reading),
+ * and Sensor - which is an ANALOG pin to read the sensor value. These pins are settable via properties.
  *
- *  Device object for the SparkFun Soil Moisture sensor.
+ * @details
+ * The class provides methods to initialize the sensor, read moisture values, and calibrate the sensor for dry and wet
+ * states. It also includes properties to enable the sensor, set the GPIO pins, and retrieve the moisture values.
  *
- *
- *
+ * @date 2025-03-05
+ * @version 1.0
+ * @note This file is part of the SparkFun Electronics Flux SDK.
  */
 
 #pragma once
@@ -28,22 +36,43 @@
 #define kSoilMoistureDeviceName "Soil Moisture Sensor"
 //----------------------------------------------------------------------------------------------------------
 // Define our class - This is a simple GPIO driven device
+
+/**
+ * @class flxDevSoilMoisture
+ * @brief A class to interface with the SparkFun Soil Moisture sensor.
+ *
+ * This class provides methods to initialize the sensor, read moisture values, and calibrate the sensor for dry and wet
+ * states. It also includes properties to enable the sensor, set the GPIO pins, and retrieve the moisture values.
+ */
 class flxDevSoilMoisture : public flxDeviceGPIOType<flxDevSoilMoisture>
 {
 
   public:
+    /**
+     * @brief Default constructor for the flxDevSoilMoisture class.
+     */
     flxDevSoilMoisture();
 
+    /**
+     * @brief Parameterized constructor for the flxDevSoilMoisture class.
+     * @param pinVCC The GPIO pin connected to the VCC of the soil sensor.
+     * @param pinSensor The GPIO pin connected to the sensor of the soil sensor.
+     */
     flxDevSoilMoisture(uint8_t pinVCC, uint8_t pinSensor) : _pinVCC{pinVCC}, _pinSensor{pinSensor}
     {
     }
-
+    /**
+     * @brief Get the device name.
+     * @return The name of the device.
+     */
     static const char *getDeviceName()
     {
         return kSoilMoistureDeviceName;
     };
-
-    // Method called to initialize the class
+    /**
+     * @brief Method called to initialize the class.
+     * @return True if initialization is successful, false otherwise.
+     */
     bool onInitialize(void);
 
   private:
@@ -51,7 +80,10 @@ class flxDevSoilMoisture : public flxDeviceGPIOType<flxDevSoilMoisture>
     static constexpr uint8_t kNoPinSet = 0;
 
     // Setup Sensor
-
+    /**
+     * @brief Sets up the sensor.
+     * @return True if setup is successful, false otherwise.
+     */
     bool setupSensor(void);
 
     // props

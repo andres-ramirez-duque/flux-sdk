@@ -8,27 +8,41 @@
  *---------------------------------------------------------------------------------
  */
 
-/*
+/**
+ * @file flxDevSoilMoisture.cpp
+ * @brief Device object for the SparkFun Soil Moisture sensor.
  *
- *  flxDevSoilMoisture.cpp
+ * This file contains the implementation of the device object for the SparkFun Soil Moisture sensor.
+ * Note - this is a GPIO device, which depends on the Soil Moisture Sensor being connected to defined GPIO pins.
+ * The required pins are VCC - a digitally controlled pin (to set low and high to power the sensor during reading),
+ * and Sensor - which is an ANALOG pin to read the sensor value. These pins are settable via properties.
  *
- *  Device object for the SparkFun Soil Moisture sensor.
+ * @details
+ * The class provides methods to initialize the sensor, read moisture values, and calibrate the sensor for dry and wet
+ * states. It also includes properties to enable the sensor, set the GPIO pins, and retrieve the moisture values.
  *
- *
- *
+ * @date 2025-03-05
+ * @version 1.0
+ * @note This file is part of the SparkFun Electronics Flux SDK.
  */
+
 #include "Arduino.h"
 
 #include "flxDevSoilMoisture.h"
 
+// When calibration is performed (average over N values) - this const is N.
 const uint8_t kCalibrationIterations = 5;
+
+// Read values can vary greatly between reads - even ms apart (very noisy sensor).
+// Normally this is okay, but when multiple reads are made for a single "observation" (sensor value, %moist),
+// the values should match - so we cache the value for a kCachedValueDeltaTicks.
 
 const uint16_t kCachedValueDeltaTicks = 1000;
 
 //----------------------------------------------------------------------------------------------------------
 // Constructor
 //
-// Object constructor. Performs initialization of device values, including device identifiers (name, I2C address),
+// Object constructor. Performs initialization of device values,
 // and managed properties.
 
 flxDevSoilMoisture::flxDevSoilMoisture()
@@ -60,17 +74,22 @@ flxDevSoilMoisture::flxDevSoilMoisture()
 //
 // Called during the startup/initialization of the driver (after the constructor is called).
 //
-// Place to initialize the underlying device library/driver
 //
 //-----------------------------------------------------------------------
 bool flxDevSoilMoisture::onInitialize(void)
 {
+    // already initialized?
     if (isInitialized())
         return true;
 
+    // return what setup sensor returns.
     return setupSensor();
 }
 //-----------------------------------------------------------------------
+// setupSensor()
+//
+// Sets up the sensor - if the pin are defined, will setup the GPIO pins as needed.
+//
 bool flxDevSoilMoisture::setupSensor(void)
 {
 
@@ -90,7 +109,8 @@ bool flxDevSoilMoisture::setupSensor(void)
 //-----------------------------------------------------------------------
 //  Properties
 //-----------------------------------------------------------------------
-
+//
+// ENABLED?
 bool flxDevSoilMoisture::get_is_enabled(void)
 {
     return _isEnabled;
@@ -106,13 +126,15 @@ void flxDevSoilMoisture::set_is_enabled(bool enable)
         setupSensor();
 }
 
+//-----------------------------------------------------------------------
+// VCC PIN
 uint8_t flxDevSoilMoisture::get_vcc_pin(void)
 {
     return _pinVCC;
 }
 void flxDevSoilMoisture::set_vcc_pin(uint8_t newPin)
 {
-
+    // Same pin, same state
     if (_pinVCC == newPin)
         return;
 
@@ -125,6 +147,8 @@ void flxDevSoilMoisture::set_vcc_pin(uint8_t newPin)
         setupSensor(); // new pin, do the setup.
 }
 
+//-----------------------------------------------------------------------
+// Sensor Pin
 uint8_t flxDevSoilMoisture::get_sensor_pin(void)
 {
     return _pinSensor;
@@ -132,6 +156,7 @@ uint8_t flxDevSoilMoisture::get_sensor_pin(void)
 void flxDevSoilMoisture::set_sensor_pin(uint8_t newPin)
 {
 
+    // same pin, same state
     if (_pinSensor == newPin)
         return;
 
@@ -146,12 +171,17 @@ void flxDevSoilMoisture::set_sensor_pin(uint8_t newPin)
 //-----------------------------------------------------------------------
 // GETTER methods for output params
 //-----------------------------------------------------------------------
+// Raw sensor value.
 uint16_t flxDevSoilMoisture::read_moisture_value()
 {
     // This returns the RAW sensor value
     if (!isInitialized() || !_isEnabled)
         return 0;
 
+    // Read values can vary greatly between reads - even ms apart (very noisy sensor).
+    // Normally this is okay, but when multiple reads are made for a single "observation" (sensor value, %moist),
+    // the values should match - so we cache the value for a second or so. to clear out some noise.
+    //
     // do we have a cached value?
     if ((millis() - _lastValueTick) > kCachedValueDeltaTicks)
     {
@@ -168,6 +198,8 @@ uint16_t flxDevSoilMoisture::read_moisture_value()
 }
 
 //-----------------------------------------------------------------------
+// Percent moisture - note takes the calibration factors into account.
+
 float flxDevSoilMoisture::read_moisture_percent()
 {
     float sensorValue = (float)read_moisture_value();
@@ -178,6 +210,8 @@ float flxDevSoilMoisture::read_moisture_percent()
 //-----------------------------------------------------------------------
 // calibration
 //-----------------------------------------------------------------------
+// Calibrates the low (dry, 0) value of the sensor. The sensor should not be in soil and just exposed to air
+
 void flxDevSoilMoisture::calibrate_low_value(void)
 {
     // check if sensor is up and setup
@@ -186,8 +220,11 @@ void flxDevSoilMoisture::calibrate_low_value(void)
         flxLog_W("%s: Sensor not setup and enabled. Unable to continue", name());
         return;
     }
+    // our running reading sum
     uint32_t valueSum = 0;
 
+    flxLog_N(F("Place the sensor in a dry state - both probes expose to air and not touching"));
+    delay(2000);
     flxLog_N_(F("Calibrating sensor dry value.."));
 
     for (int i = 0; i < kCalibrationIterations; i++)
@@ -204,6 +241,8 @@ void flxDevSoilMoisture::calibrate_low_value(void)
     this->setIsDirty();
 }
 //-----------------------------------------------------------------------
+// Get the 100% wet state - the two sensors should be shorted together.
+
 void flxDevSoilMoisture::calibrate_high_value(void)
 {
     // check if sensor is up and setup
@@ -214,6 +253,8 @@ void flxDevSoilMoisture::calibrate_high_value(void)
     }
     uint32_t valueSum = 0;
 
+    flxLog_N(F("Place the sensor in a wet state - short both probes together"));
+    delay(2000);
     flxLog_N_(F("Calibrating sensor 100% wet value.."));
     for (int i = 0; i < kCalibrationIterations; i++)
     {
