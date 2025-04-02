@@ -377,7 +377,7 @@ std::string flxDevGNSS::read_carrier_soln_string()
 }
 
 // method for location
-bool flxDevGNSS::get_float_location(flxDataArrayFloat *arrLocation)
+bool flxDevGNSS::get_location(flxDataArrayFloat *arrLocation)
 {
 
     float position[2] = {0};
