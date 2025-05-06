@@ -55,11 +55,11 @@ class flxNTPESP32 : public flxActionType<flxNTPESP32>, public flxIClock
 
         flxRegisterEventCB(flxEvent::kOnConnectionChange, this, &flxNTPESP32::onConnectionChange);
     }
-    void setStartupDelay(uint delay)
+    void setStartupDelay(uint32_t delay)
     {
         _startupDelay = delay;
     }
-    uint startupDelay(void)
+    uint32_t startupDelay(void)
     {
         return _startupDelay;
     }
@@ -67,8 +67,8 @@ class flxNTPESP32 : public flxActionType<flxNTPESP32>, public flxIClock
     // timing/clock upating interface methods
     // Note - the NTP updates run in the background for the ESP32
 
-    uint get_epoch(void);
-    void set_epoch(const uint &)
+    uint32_t get_epoch(void);
+    void set_epoch(const uint32_t &)
     {
     }
     bool valid_epoch(void);
@@ -87,7 +87,7 @@ class flxNTPESP32 : public flxActionType<flxNTPESP32>, public flxIClock
 
     flxNetwork *_theNetwork;
 
-    uint _startupDelay;
+    uint32_t _startupDelay;
 };
 
 #endif
