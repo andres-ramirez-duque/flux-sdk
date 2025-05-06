@@ -61,6 +61,20 @@ class flxFlux : public flxObjectContainer
     }
     void add(flxDevice *theDevice);
 
+    void remove(flxDevice &theDevice)
+    {
+        remove(&theDevice);
+    }
+
+    void remove(flxDevice *theDevice);
+
+    bool contains(flxDevice &theDevice)
+    {
+        return contains(&theDevice);
+    }
+
+    bool contains(flxDevice *theDevice);
+
     // This is a singleton class - so delete copy & assignment constructors
     flxFlux(flxFlux const &) = delete;
     void operator=(flxFlux const &) = delete;

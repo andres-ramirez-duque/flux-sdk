@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -258,7 +259,7 @@ class _flxPropertyBase : public flxProperty, public _flxDataIn<T>, public _flxDa
 
     bool hidden()
     {
-        return (_flags & kIsHidden == kIsHidden);
+        return ((_flags & kIsHidden) == kIsHidden);
     }
     // Add a method that allows the property to be hidden if public
     void setHidden(void)
@@ -267,7 +268,7 @@ class _flxPropertyBase : public flxProperty, public _flxDataIn<T>, public _flxDa
     }
     bool secure()
     {
-        return (_flags & kIsSecure == kIsSecure);
+        return ((_flags & kIsSecure) == kIsSecure);
     }
     //---------------------------------------------------------------------------------
     flxDataType_t type()
@@ -416,7 +417,7 @@ class _flxPropertyBaseString : public flxProperty, _flxDataInString, _flxDataOut
 
     bool hidden()
     {
-        return (_flags & kIsHidden == kIsHidden);
+        return ((_flags & kIsHidden) == kIsHidden);
     }
     // Add a method that allows the property to be hidden if public
     void setHidden(void)
@@ -425,7 +426,7 @@ class _flxPropertyBaseString : public flxProperty, _flxDataInString, _flxDataOut
     }
     bool secure()
     {
-        return (_flags & kIsSecure == kIsSecure);
+        return ((_flags & kIsSecure) == kIsSecure);
     }
 
     flxDataType_t type()
@@ -1918,7 +1919,7 @@ class flxObject : public flxPersist, public _flxPropertyContainer, public flxDes
         bool status = onRestore(stBlk);
 
         if (!status)
-            flxLogM_D(kMsgErrSaveResState, "restoring", name());
+            flxLog_D("%s: some values not restored", name());
 
         pStorage->endBlock(stBlk);
 
@@ -1973,7 +1974,7 @@ template <class T> class flxContainer : public flxObject
         // make sure the value isn't already in the list...
         if (std::find(_vector.begin(), _vector.end(), value) != _vector.end())
         {
-            flxLogM_I(kMsgNotAddDupDev, name());
+            flxLogM_V(kMsgNotAddDupDev, name());
             return;
         }
         _vector.push_back(value);
@@ -2062,6 +2063,15 @@ template <class T> class flxContainer : public flxObject
             return;
 
         _vector.erase(it);
+    }
+
+    // Does this vector contains a value?
+    bool contains(T value)
+    {
+        // in the vector?
+        iterator it = std::find(_vector.begin(), _vector.end(), value);
+
+        return it != _vector.end();
     }
 
     // Defines a type specific static method - so can be called outside
