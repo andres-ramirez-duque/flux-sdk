@@ -72,7 +72,7 @@ class flxIoTAzure : public flxMQTTESP32SecureCore<flxIoTAzure>, public flxWriter
     }
 
     // for the Writer interface
-    void write(int data)
+    void write(int32_t data)
     {
         // noop
     }
