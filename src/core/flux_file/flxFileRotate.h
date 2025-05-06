@@ -59,7 +59,7 @@ class flxFileRotate : public flxActionType<flxFileRotate>, public flxWriter
         flux.add(this);
     };
 
-    void write(int);
+    void write(int32_t);
     void write(float);
     void write(const char *, bool newline, flxLineType_t type);
 

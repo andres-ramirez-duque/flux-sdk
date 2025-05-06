@@ -55,9 +55,9 @@ class flxWriter
   public:
     virtual void write(bool value)
     {
-        write((int)value);
+        write((int32_t)value);
     };
-    virtual void write(int) = 0;
+    virtual void write(int32_t) = 0;
     virtual void write(float) = 0;
     virtual void write(const char *value, bool newline, flxLineType_t type) = 0;
     virtual void write(const char *value, bool newline)
