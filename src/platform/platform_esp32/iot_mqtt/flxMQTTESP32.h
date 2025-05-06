@@ -19,6 +19,7 @@
 
 #include <ArduinoMqttClient.h>
 #include <WiFiClientSecure.h>
+#include <WiFi.h>
 
 // A General MQTT client for the framework - for use on the ESP32
 template <class Object, typename CLIENT> class flxMQTTESP32Base : public flxActionType<Object>
@@ -271,7 +272,7 @@ class flxMQTTESP32 : public flxMQTTESP32Base<flxMQTTESP32, WiFiClient>, public f
         flux.add(this);
     }
     // for the Writer interface
-    void write(int data)
+    void write(int32_t data)
     {
         // noop
     }
@@ -578,7 +579,7 @@ class flxMQTTESP32Secure : public flxMQTTESP32SecureCore<flxMQTTESP32Secure>, pu
         flux.add(this);
     }
     // for the Writer interface
-    void write(int data)
+    void write(int32_t data)
     {
         // noop
     }
