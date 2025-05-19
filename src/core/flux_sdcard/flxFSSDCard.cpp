@@ -8,25 +8,15 @@
  *---------------------------------------------------------------------------------
  */
 
-// Object wrapper around the SD Card object. This allows this object to
-// be part of the framework.
-
 #include "flxFSSDCard.h"
 #include <string>
 
-// #include "FS.h"
+#include "FS.h"
 #include "SD.h"
 
-//-----------------------------------------------------------------------
-// The SD systems wants filenames with full paths. The callers
-// the his module could miss that. Add a function to check
-//
-// A proper filename is returned in destbuffer.
-
-// Returns true on success.
+// Helper to ensure full path for file names
 static bool checkForFullPath(const char *filename, char *destbuffer, size_t length)
 {
-
     if (!filename || length < 5)
         return false;
 
@@ -42,16 +32,13 @@ static bool checkForFullPath(const char *filename, char *destbuffer, size_t leng
     return true;
 }
 
-// Global object - for quick access to FS.
 _flxFSSDCard &_theSDCard = _flxFSSDCard::get();
 
-//-----------------------------------------------------------------------
 bool _flxFSSDCard::initialize()
 {
     if (_isInitalized)
         return true;
 
-    // do we have a power pin for the SD card?
     if (_pinPower)
         pinMode(_pinPower, OUTPUT);
 
@@ -59,7 +46,6 @@ bool _flxFSSDCard::initialize()
     digitalWrite(_pinCS, HIGH);
 
     setPower(true);
-
     delay(1000);
 
     if (!SD.begin(_pinCS))
@@ -68,19 +54,9 @@ bool _flxFSSDCard::initialize()
         return false;
     }
 
-    // if (SD_MMC.cardType() == CARD_NONE)
-    // {
-    //     flxLog_W(F("No SD card attached. Please insert an SD card."));
-    //     return false;
-    // }
-
     _isInitalized = true;
-
-    // If we are here, we are ready.
     return true;
 }
-
-//-----------------------------------------------------------------------
 
 bool _flxFSSDCard::initialize(uint8_t pinCS)
 {
@@ -91,7 +67,6 @@ bool _flxFSSDCard::initialize(uint8_t pinCS)
     return initialize();
 }
 
-//-----------------------------------------------------------------------
 bool _flxFSSDCard::initialize(uint8_t pinCS, uint8_t pinPower)
 {
     if (!pinCS || !pinPower)
@@ -99,60 +74,42 @@ bool _flxFSSDCard::initialize(uint8_t pinCS, uint8_t pinPower)
 
     _pinCS = pinCS;
     _pinPower = pinPower;
-
     return initialize();
 }
-//-----------------------------------------------------------------------
-// Power interface
+
 void _flxFSSDCard::setPower(bool powerOn)
 {
     if (!_pinPower || (_isInitalized && powerOn == _powerOn))
-        return; // no need to continue
+        return;
 
     pinMode(_pinPower, OUTPUT);
     digitalWrite(_pinPower, (powerOn ? LOW : HIGH));
     _powerOn = powerOn;
 }
 
-//-----------------------------------------------------------------------
 flxFSFile _flxFSSDCard::open(const char *name, flxFileOpenMode_t mode, bool create)
 {
-    // Framework file
     flxFSFile theflxFile;
-
     if (!_isInitalized || !name || strlen(name) == 0)
         return theflxFile;
 
     const char *sdMode = "r";
-
     if (mode == kFileWrite)
         sdMode = "w+";
     else if (mode == kFileAppend)
         sdMode = "a+";
 
-    // the MMC needs to have a full path - the filename must start with "/"
-
     char szBuffer[128];
-
     if (!checkForFullPath(name, szBuffer, sizeof(szBuffer)))
         return theflxFile;
 
-    // File sdFile = SD.open(szBuffer, sdMode, create);
     File sdFile = SD.open(szBuffer, sdMode);
 
     if (sdFile)
     {
-
-        // setup our file object that implements flxIFile interface
         flxFSSDFile theFile;
-
-        // set the File object in our file driver interface
         theFile.setFile(sdFile);
-
-        // Move our object to a smart pointer
         std::shared_ptr<flxIFile> pFile = std::make_shared<flxFSSDFile>(std::move(theFile));
-
-        // Now set our driver, into the framework driver
         theflxFile.setIFile(pFile);
     }
     else
@@ -161,7 +118,6 @@ flxFSFile _flxFSSDCard::open(const char *name, flxFileOpenMode_t mode, bool crea
     return theflxFile;
 }
 
-//-----------------------------------------------------------------------
 bool _flxFSSDCard::exists(const char *name)
 {
     if (!_isInitalized)
@@ -174,7 +130,6 @@ bool _flxFSSDCard::exists(const char *name)
     return SD.exists(szBuffer);
 }
 
-//-----------------------------------------------------------------------
 bool _flxFSSDCard::remove(const char *name)
 {
     if (!_isInitalized)
@@ -187,7 +142,6 @@ bool _flxFSSDCard::remove(const char *name)
     return SD.remove(szBuffer);
 }
 
-//-----------------------------------------------------------------------
 bool _flxFSSDCard::rename(const char *nameFrom, const char *nameTo)
 {
     if (!_isInitalized)
@@ -204,7 +158,6 @@ bool _flxFSSDCard::rename(const char *nameFrom, const char *nameTo)
     return SD.rename(szBuffFrom, szBuffTo);
 }
 
-//-----------------------------------------------------------------------
 bool _flxFSSDCard::mkdir(const char *path)
 {
     if (!_isInitalized)
@@ -217,7 +170,6 @@ bool _flxFSSDCard::mkdir(const char *path)
     return SD.mkdir(szBuffer);
 }
 
-//-----------------------------------------------------------------------
 bool _flxFSSDCard::rmdir(const char *path)
 {
     if (!_isInitalized)
@@ -230,30 +182,46 @@ bool _flxFSSDCard::rmdir(const char *path)
     return SD.rmdir(szBuffer);
 }
 
-//-----------------------------------------------------------------------
 uint64_t _flxFSSDCard::size(void)
 {
     if (!_isInitalized)
         return 0;
 
+#if defined(ESP32)
+    return SD.cardSize();
+#else
     return SD.size64();
+#endif
 }
 
-//-----------------------------------------------------------------------
 uint64_t _flxFSSDCard::total(void)
 {
     if (!_isInitalized)
         return 0;
 
-    return SD.totalClusters() * SD.clusterSize();
+    return SD.totalBytes();
 }
-//-----------------------------------------------------------------------
 
 const char *_flxFSSDCard::type(void)
 {
     if (!_isInitalized)
         return "Unknown";
 
+#if defined(ESP32)
+    switch (SD.cardType())
+    {
+    case CARD_MMC:
+        return "MMC";
+    case CARD_SD:
+        return "SD";
+    case CARD_SDHC:
+        return "SDHC";
+    case CARD_NONE:
+        return "NO CARD";
+    default:
+        return "UNKNOWN";
+    }
+#else
     switch (SD.type())
     {
     case SD_CARD_TYPE_SD1:
@@ -264,51 +232,50 @@ const char *_flxFSSDCard::type(void)
         return "SDHC";
     case 0:
         return "NO CARD";
-
     default:
         return "UNKNOWN";
     }
+#endif
 }
 
 uint64_t _flxFSSDCard::used(void)
 {
-    if (!_isInitalized)
-        return 0;
-
+#if defined(ESP32)
+    return SD.usedBytes();
+#else
     FSInfo fs_info;
-    SDFS.info(fs_info);
-
+    SD.info(fs_info);
     return fs_info.usedBytes;
+#endif
 }
 
-// FS _flxFSSDCard::fileSystem(void)
-// {
-//     return FS;
-// }
-// -------------------------------------------------------
+FS _flxFSSDCard::fileSystem(void)
+{
+    return SD;
+}
+
+// -----------------------------------------------------------------------------
 // File implementation
 
 bool flxFSSDFile::isValid()
 {
-    // if  the file object exist, we exist
-    return _file == true;
+    return _file;
 }
 
 size_t flxFSSDFile::write(const uint8_t *buf, size_t size)
 {
     if (!_file)
-        return false;
-
+        return 0;
     return _file.write(buf, size);
 }
 
 size_t flxFSSDFile::read(uint8_t *buf, size_t size)
 {
     if (!_file)
-        return false;
-
+        return 0;
     return _file.read(buf, size);
 }
+
 void flxFSSDFile::close(void)
 {
     if (_file)
@@ -323,32 +290,22 @@ void flxFSSDFile::flush(void)
 
 size_t flxFSSDFile::size(void)
 {
-    if (_file)
-        return _file.size();
-
-    return 0;
+    return _file ? _file.size() : 0;
 }
 
 const char *flxFSSDFile::name(void)
 {
-    if (_file)
-        return _file.name();
-
-    return nullptr;
+    return _file ? _file.name() : nullptr;
 }
 
 bool flxFSSDFile::isDirectory(void)
 {
-    if (_file)
-        return _file.isDirectory();
-
-    return false;
+    return _file && _file.isDirectory();
 }
 
 std::string flxFSSDFile::getNextFilename(void)
 {
     std::string tmp = "";
-
     if (_file)
     {
         File fNext = _file.openNextFile();
@@ -363,54 +320,32 @@ std::string flxFSSDFile::getNextFilename(void)
 
 time_t flxFSSDFile::getLastWrite(void)
 {
-    if (_file)
-        return _file.getLastWrite();
-
-    return 0;
+    return _file ? _file.getLastWrite() : 0;
 }
 
-//-----------------------------------------------------------------------
 flxFSFile flxFSSDFile::openNextFile(void)
 {
-    // Framework file
     flxFSFile theflxFile;
-
     if (!_file || !_file.isDirectory())
         return theflxFile;
 
     File sdFile = _file.openNextFile();
-
     if (sdFile)
     {
-
-        // setup our SD file object that implements flxIFile interface
         flxFSSDFile theFile;
-
-        // set the File object in our file driver interface
         theFile.setFile(sdFile);
-
-        // Move our object to a smart pointer
         std::shared_ptr<flxIFile> pFile = std::make_shared<flxFSSDFile>(std::move(theFile));
-
-        // Now set our SD driver, into the framework driver
         theflxFile.setIFile(pFile);
     }
-
     return theflxFile;
 }
 
 int flxFSSDFile::available(void)
 {
-    if (_file)
-        return _file.available();
-
-    return 0;
+    return _file ? _file.available() : 0;
 }
 
 Stream *flxFSSDFile::stream(void)
 {
-    if (_file)
-        return &_file;
-
-    return nullptr;
+    return _file ? &_file : nullptr;
 }
