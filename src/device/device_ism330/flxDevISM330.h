@@ -47,6 +47,7 @@ class flxDevISM330Base : public flxDevice, public QwDevISM330DHCX
     float read_gyro_y();
     float read_gyro_z();
     float read_temperature();
+    float read_steps();
 
     // methods used to get values for our RW properties
     uint8_t get_accel_data_rate();
@@ -97,6 +98,7 @@ class flxDevISM330Base : public flxDevice, public QwDevISM330DHCX
     flxParameterOutFloat<flxDevISM330Base, &flxDevISM330Base::read_gyro_y> gyroY;
     flxParameterOutFloat<flxDevISM330Base, &flxDevISM330Base::read_gyro_z> gyroZ;
     flxParameterOutFloat<flxDevISM330Base, &flxDevISM330Base::read_temperature> temperature;
+    flxParameterOutFloat<flxDevISM330Base, &flxDevISM330Base::read_steps> steps;
 
     // Define our read-write properties
     flxPropertyRWUInt8<flxDevISM330Base, &flxDevISM330Base::get_accel_data_rate, &flxDevISM330Base::set_accel_data_rate>

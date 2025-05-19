@@ -57,6 +57,7 @@ flxDevISM330Base::flxDevISM330Base()
     flxRegister(gyroY, "Gyro Y (milli-dps)", "Gyro Y (milli-dps)", kParamValueGyroY);
     flxRegister(gyroZ, "Gyro Z (milli-dps)", "Gyro Z (milli-dps)", kParamValueGyroZ);
     flxRegister(temperature, "Temperature (C)", "The ambient temperature in degrees C");
+    flxRegister(steps, "Steps", "Number of steps estimated");
 
     // Register properties
     flxRegister(accelDataRate, "Accel Data Rate (Hz)", "Accelerometer Data Rate (Hz)");
@@ -77,6 +78,8 @@ bool flxDevISM330Base::onInitialize(void)
     bool result = true;
 
     deviceReset();
+    stepCounterReset();
+
     unsigned long startTime = millis();
     bool reset = false;
 
@@ -88,6 +91,7 @@ bool flxDevISM330Base::onInitialize(void)
     if (reset)
     {
         delay(100);
+        result &= setStepCounterConfig();
         result &= setDeviceConfig();
         result &= setBlockDataUpdate();
         result &= setAccelDataRate(_accel_data_rate);
@@ -195,7 +199,11 @@ float flxDevISM330Base::read_temperature()
     temp += 25;  // The output of the temperature sensor is 0 LSB (typ.) at 25 °C
     return temp;
 }
-
+float flxDevISM330Base::read_steps()
+{
+    float steps = (float)getStepCounter();
+    return steps;
+}
 uint8_t flxDevISM330Base::get_accel_data_rate()
 {
     return _accel_data_rate;
