@@ -92,7 +92,11 @@ bool flxDevBioHub::initialize(int connectResetPin, int connectMfioPin)
     {
         TwoWire *wirePort = flux.i2cDriver().getWirePort();
         if (onInitialize(*wirePort))
+        {
+            setIsInitialized(true);
             return true;
+        }    
+        
     }
 
     return false;
@@ -118,9 +122,11 @@ bool flxDevBioHub::isConnected(flxBusI2C &i2cDriver, uint8_t address)
 bool flxDevBioHub::onInitialize(TwoWire &wirePort)
 {
     // On success, begin will return 0x00. It will return 0xFF if the pins have not been defined
+    bool conf_status;
     bool status = SparkFun_Bio_Sensor_Hub::begin(wirePort, _resetPin, _mfioPin) == 0x00;
     if (status)
-        SparkFun_Bio_Sensor_Hub::configBpm(MODE_TWO); // MODE_TWO provides the oxygen R value
+        conf_status = SparkFun_Bio_Sensor_Hub::configBpm(MODE_ONE) == 0x00; // MODE_TWO provides the oxygen R value
+        return conf_status;
     return status;
 }
 
